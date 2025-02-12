@@ -1,0 +1,22 @@
+---
+title: "Activity 5"
+author: "Isaac Amouzou"
+date: "2025-02-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+subset_early_bloom <- read_csv("Data/cherry-bloom-early.csv") %>%
+  select(early_bloom, location, matches('tmax'))
+head(subset_early_bloom)
+```
+
