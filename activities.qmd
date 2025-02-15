@@ -1,0 +1,15 @@
+---
+title: "Activities"
+author: "Isaac Amouzou"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+subsetted_data <- read.csv("Data/cherry-bloom-early.csv") %>%
+  select(early_bloom,location,matches('tmax'))
+```
