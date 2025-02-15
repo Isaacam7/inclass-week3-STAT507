@@ -6,6 +6,7 @@ editor: visual
 ---
 
 ```{r}
+set.seed(507)
 library(tidyverse)
 ```
 
@@ -42,4 +43,46 @@ plot(rf_roc, print.auc = TRUE)
 
 The randomforest method is a machine learning model that uses multiple trees - which are each trained on randomly selected subsets of the data - as an ensemble method with prediction by voting between the trees to predict a class (in this case whether or not an early bloom occurs)
 
-The AUC-ROC method is a way to evaluate the performance of a classification model by comparing true positive rate and false positive rate . In this case with a AUC: 0.656, the model performs somewhat better than random guessing.
+The AUC-ROC method is a way to evaluate the performance of a classification model by comparing true positive rate and false positive rate . In this case with a AUC: 0.666, the model performs somewhat better than random guessing.
+
+# Activity 7
+
+```{r}
+paucs <- map_dbl(1:100, \(i) {
+  set.seed(i) 
+  K <- 100
+  # Create K CV folds
+  indices <- sample.int(nrow(cherry_data_selected))
+  folds <- split(indices, rep_len(1:K, length(indices)))
+  
+   # Fit the model to the training data in each fold and collect the predictions on the test data
+  
+  cv_pred_prob <- numeric(nrow(cherry_data_selected))
+  
+  for (fold_nr in 1:K) {
+    fold_indices <- folds[[fold_nr]]
+    cv_train_data <- cherry_data_selected[-fold_indices, ]
+    cv_test_data <- cherry_data_selected[fold_indices, ]
+    
+    set.seed(fold_nr)  
+    cv_fit_rf <- randomForest(early_bloom ~ ., data = cv_train_data)
+    
+    predictions <- predict(cv_fit_rf, newdata = cv_test_data, type = "prob")[, "yes"]
+    cv_pred_prob[fold_indices] <- predictions
+  }
+  
+  # Compute and return the pAUC for this specific CV split
+  
+  rf_cv_roc <- roc(response = cherry_data_selected$early_bloom,
+                 predictor = cv_pred_prob,
+                 levels = c("no", "yes"),
+                 direction = "<")
+  
+  return(as.numeric(auc(rf_cv_roc)))
+})
+
+hist(paucs)
+mean(paucs)
+quantile(paucs, c(0.025, 0.975)) # a naive CI
+
+```
