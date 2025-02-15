@@ -9,7 +9,37 @@ editor: visual
 library(tidyverse)
 ```
 
+# Activity 5
+
 ```{r}
 cherry_data_selected <- read.csv("Data/cherry-bloom-early.csv") %>%
   select(early_bloom,location,matches('tmax'))
 ```
+
+# Activity 6
+
+```{r}
+library(randomForest)
+
+cherry_data_selected <-  cherry_data_selected %>% 
+  mutate(early_bloom = fct_relevel(early_bloom, 'no'))
+
+fitted_rf <- randomForest(early_bloom ~ ., data = cherry_data_selected)
+
+```
+
+```{r}
+library(pROC)
+library(randomForest)
+
+rf_roc <- roc(response = cherry_data_selected$early_bloom,
+              predictor = predict(fitted_rf, type = "prob")[, "yes"],
+              levels = c("no", "yes"),
+              direction = "<")
+
+plot(rf_roc, print.auc = TRUE)
+```
+
+The randomforest method is a machine learning model that uses multiple trees - which are each trained on randomly selected subsets of the data - as an ensemble method with prediction by voting between the trees to predict a class (in this case whether or not an early bloom occurs)
+
+The AUC-ROC method is a way to evaluate the performance of a classification model by comparing true positive rate and false positive rate . In this case with a AUC: 0.656, the model performs somewhat better than random guessing.
