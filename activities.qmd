@@ -10,6 +10,6 @@ library(tidyverse)
 ```
 
 ```{r}
-subsetted_data <- read.csv("Data/cherry-bloom-early.csv") %>%
+cherry_data_selected <- read.csv("Data/cherry-bloom-early.csv") %>%
   select(early_bloom,location,matches('tmax'))
 ```
